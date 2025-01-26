@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@android:color/black">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
+
+
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/Base.Theme.Popcorn">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/appBarLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/colorPrimary"
+                    app:titleTextColor="@android:color/white">
+
+                    <include layout="@layout/toolbar_title_layout" />
+
+                </androidx.appcompat.widget.Toolbar>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <TextView
+                android:id="@+id/signUpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sign Up"
+                android:textColor="@android:color/white"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:gravity="left"
+                android:padding="16dp"
+                android:background="@android:color/black"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="First Name"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/firstNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Last Name"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/lastNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/usernameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/emailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Password"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirm Password"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <EditText
+                android:id="@+id/confirmPasswordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Gender"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+            <Spinner
+                android:id="@+id/genderSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/gender_options"
+                android:prompt="@string/gender_prompt"
+                android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/signUpButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:text="Sign Up"
+                android:backgroundTint="@color/colorPrimary"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Or: Continue with google"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+
+            <ImageView
+                android:id="@+id/googleSignUpButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/google" />
+
+
+
+            <TextView
+                android:id="@+id/signInPrompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already registered? "
+                android:textColor="@android:color/white"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/signInClickable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign in"
+                android:textColor="@color/colorPrimary"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:backgroundTint="@color/colorPrimary"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu"
+        app:itemTextColor="@color/color_state_list" />
+
+
+</androidx.drawerlayout.widget.DrawerLayout>

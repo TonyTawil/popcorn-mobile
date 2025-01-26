@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Popcorn</string>
+        <string name="navigation_drawer_open">Open navigation drawer</string>
+        <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="gender_prompt">Select your gender</string>
+    <string name="server_client_id">958566681354-53j84oak5k7uilaje1lg8hcg1f0fs067.apps.googleusercontent.com</string>
+    <string-array name="gender_options">
+        <item>male</item>
+        <item>female</item>
+    </string-array>
+
+</resources>

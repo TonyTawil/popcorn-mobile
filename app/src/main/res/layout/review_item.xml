@@ -1,0 +1,78 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tvReviewerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Username" />
+
+    <RatingBar
+        android:id="@+id/ratingBarSmall"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:rating="3.5"
+        android:isIndicator="true"
+        android:stepSize="0.5"
+        app:layout_constraintStart_toStartOf="@+id/tvReviewerName"
+        app:layout_constraintTop_toBottomOf="@+id/tvReviewerName" />
+
+    <TextView
+        android:id="@+id/tvReviewText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toStartOf="@+id/ivEdit"
+        app:layout_constraintStart_toStartOf="@+id/ratingBarSmall"
+        app:layout_constraintTop_toBottomOf="@+id/ratingBarSmall"
+        tools:text="This is a sample review text that might go on for a couple of lines. The text wraps and shows the entire content." />
+
+    <TextView
+        android:id="@+id/tvReviewDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/tvReviewText"
+        app:layout_constraintStart_toStartOf="@+id/tvReviewText"
+        app:layout_constraintTop_toBottomOf="@+id/tvReviewText"
+        tools:text="Jan 01, 2024" />
+
+    <ImageView
+        android:id="@+id/ivEdit"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintBottom_toBottomOf="@+id/tvReviewText"
+        app:layout_constraintEnd_toStartOf="@+id/ivDelete"
+        app:layout_constraintTop_toTopOf="@+id/tvReviewText"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/ivDelete"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/delete"
+        app:layout_constraintBottom_toBottomOf="@+id/ivEdit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivEdit"
+        android:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
