@@ -12,7 +12,7 @@ public class RetrofitClient {
     private static Retrofit retrofit = null;
 
     // Use this for production
-    private static final String PRODUCTION_URL = "https://antoinetawil.com/";
+    private static final String PRODUCTION_URL = "https://popcorn.antoinetawil.com/";
     // Use this for local development
     private static final String LOCAL_URL = "http://10.0.2.2:3000/";
 
