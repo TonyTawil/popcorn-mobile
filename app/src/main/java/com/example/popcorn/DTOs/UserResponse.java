@@ -1,68 +1,38 @@
 package com.example.popcorn.DTOs;
 
+import com.google.gson.annotations.SerializedName;
+
 public class UserResponse {
-    private String _id;
-    private String firstName;
-    private String lastName;
-    private String username;
-    private String email;
-    private String gender;
+    private String message;
+    private User user;
 
-    public UserResponse(String _id, String firstName, String lastName, String username, String email, String gender) {
-        this._id = _id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.email = email;
-        this.gender = gender;
+    public static class User {
+        private String id;
+        private String email;
+        private String username;
+        private String name;
+        private boolean verified;
+
+        // Getters
+        public String getId() { return id; }
+        public String getEmail() { return email; }
+        public String getUsername() { return username; }
+        public String getName() { return name; }
+        public boolean isVerified() { return verified; }
+
+        // Setters
+        public void setId(String id) { this.id = id; }
+        public void setEmail(String email) { this.email = email; }
+        public void setUsername(String username) { this.username = username; }
+        public void setName(String name) { this.name = name; }
+        public void setVerified(boolean verified) { this.verified = verified; }
     }
 
-    public String getId() {
-        return _id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getGender() {
-        return gender;
-    }
+    // Getters
+    public String getMessage() { return message; }
+    public User getUser() { return user; }
 
     // Setters
-    public void setId(String _id) {
-        this._id = _id;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+    public void setMessage(String message) { this.message = message; }
+    public void setUser(User user) { this.user = user; }
 }

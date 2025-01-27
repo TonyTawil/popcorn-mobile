@@ -118,7 +118,7 @@ public class SignInActivity extends AppCompatActivity {
                 String idToken = account.getIdToken();
                 Log.i(TAG, "Google ID Token: " + idToken);
 
-                fetchUserFromBackend(account.getEmail());
+                handleGoogleSignIn(account);
             } else {
                 Log.w(TAG, "signInResult:failed - account is null");
                 updateUI(null);
@@ -129,40 +129,88 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchUserFromBackend(String email) {
+    private void handleGoogleSignIn(GoogleSignInAccount account) {
         ApiService apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService.class);
-        Call<UserResponse> call = apiService.getUserByEmail(email);
+        Call<UserResponse> call = apiService.getUserByEmail(account.getEmail());
+
         call.enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    UserResponse user = response.body();
-                    saveUserDetailsAndNavigate(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+                    UserResponse userResponse = response.body();
+                    handleLoginResponse(userResponse);
                 } else {
-                    Log.w(TAG, "User fetch failed: " + response.message());
-                    updateUI(null);
+                    // Handle error or user not found
+                    Toast.makeText(SignInActivity.this, "User not found", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
-                updateUI(null);
+                Toast.makeText(SignInActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void saveUserDetailsAndNavigate(String userId, String firstName, String lastName, String email) {
-        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("userId", userId);
-        editor.putString("firstName", firstName);
-        editor.putString("lastName", lastName);
-        editor.putString("email", email);
-        editor.apply();
+    private void handleLoginResponse(UserResponse userResponse) {
+        if (userResponse != null && userResponse.getUser() != null) {
+            UserResponse.User user = userResponse.getUser();
+            
+            if (!user.isVerified()) {
+                // If not verified, store userId and redirect to verification page
+                SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("userId", user.getId());
+                editor.apply();
+                
+                Intent intent = new Intent(SignInActivity.this, VerificationActivity.class);
+                startActivity(intent);
+                finish();
+                return;
+            }
+            
+            // If verified, proceed with normal login
+            String[] nameParts = user.getName().split(" ", 2);
+            String firstName = nameParts[0];
+            String lastName = nameParts.length > 1 ? nameParts[1] : "";
+            
+            saveUserDetailsAndNavigate(
+                user.getId(),
+                firstName,
+                lastName,
+                user.getEmail()
+            );
+        }
+    }
 
-        Toast.makeText(this, "Signed in as: " + email, Toast.LENGTH_SHORT).show();
-        navigateToMainActivity();
+    private void performLogin() {
+        String username = usernameEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        LoginUser loginUser = new LoginUser(username, password);
+        ApiService apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService.class);
+        Call<UserResponse> call = apiService.loginUser(loginUser);
+
+        call.enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserResponse userResponse = response.body();
+                    handleLoginResponse(userResponse);
+                } else {
+                    try {
+                        Toast.makeText(SignInActivity.this, "Login failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Toast.makeText(SignInActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void updateUI(GoogleSignInAccount account) {
@@ -177,38 +225,6 @@ public class SignInActivity extends AppCompatActivity {
         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    private void performLogin() {
-        String username = usernameEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
-
-        ApiService apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService.class);
-        Call<UserResponse> call = apiService.loginUser(new LoginUser(username, password));
-        call.enqueue(new Callback<UserResponse>() {
-            @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UserResponse user = response.body();
-                    saveUserDetailsAndNavigate(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-                } else {
-                    handleLoginError(response);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
-                Toast.makeText(SignInActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void handleLoginError(Response<UserResponse> response) {
-        try {
-            Toast.makeText(SignInActivity.this, "Login failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            Toast.makeText(SignInActivity.this, "Error parsing error response", Toast.LENGTH_LONG).show();
-        }
     }
 
     private void navigateToSignUp() {
@@ -229,5 +245,19 @@ public class SignInActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    private void saveUserDetailsAndNavigate(String userId, String firstName, String lastName, String email) {
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("userId", userId);
+        editor.putString("firstName", firstName);
+        editor.putString("lastName", lastName);
+        editor.putString("email", email);
+        editor.apply();
+
+        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

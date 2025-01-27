@@ -48,13 +48,13 @@ public interface ApiService {
     @GET("api/auth/is-verified/{userId}")
     Call<VerificationResponse> checkEmailVerified(@Path("userId") String userId);
 
-    @POST("api/movies/get-watchlist")
+    @POST("api/mobile/watchlist/get")
     Call<WatchlistResponse> fetchWatchlist(@Body WatchlistRequest request);
 
-    @POST("api/movies/add-to-watchlist")
+    @POST("api/mobile/watchlist/add")
     Call<WatchlistAddResponse> addToWatchlist(@Body WatchlistAddRequest request);
 
-    @POST("api/movies/remove-from-watchlist")
+    @POST("api/mobile/watchlist/remove")
     Call<ResponseBody> removeFromWatchlist(@Body WatchlistRemoveRequest request);
 
     @POST("api/movies/get-watched")
@@ -78,28 +78,28 @@ public interface ApiService {
     @PUT("api/reviews/{reviewId}")
     Call<ReviewResponse> updateReview(@Path("reviewId") String reviewId, @Body ReviewRequest reviewRequest);
 
-    @GET("api/tmdb/similar/{movieId}")
-    Call<MoviesResponse> getSimilarMovies(@Path("movieId") int movieId);
-
-    @GET("api/tmdb/movie/{movieId}")
+    @GET("api/mobile/movies/{movieId}/details")
     Call<MovieResponse> getMovieDetails(@Path("movieId") int movieId);
 
-    @GET("api/tmdb/credits/{movieId}")
+    @GET("api/mobile/movies/{movieId}/credits")
     Call<CreditsResponse> fetchMovieCredits(@Path("movieId") int movieId);
 
-    @GET("api/tmdb/type/{type}")
+    @GET("api/mobile/movies/{movieId}/similar")
+    Call<MoviesResponse> getSimilarMovies(@Path("movieId") int movieId);
+
+    @GET("api/mobile/movies/type/{type}")
     Call<MoviesResponse> getMoviesByType(@Path("type") String type, @Query("page") int page);
 
-    @POST("api/auth/logout")
+    @GET("api/mobile/movies/search")
+    Call<MoviesResponse> searchMovies(@Query("query") String query);
+
+    @GET("api/mobile/movies/{movieId}/videos")
+    Call<TrailerResponse> fetchMovieTrailers(@Path("movieId") int movieId);
+
+    @POST("api/mobile/auth/logout")
     Call<Void> logoutUser();
 
     @GET("api/auth/user/email/{email}")
     Call<UserResponse> getUserByEmail(@Path("email") String email);
-
-    @GET("api/tmdb/search")
-    Call<MoviesResponse> searchMovies(@Query("query") String query);
-
-    @GET("api/tmdb/movie/{movieId}/videos")
-    Call<TrailerResponse> fetchMovieTrailers(@Path("movieId") int movieId);
 
 }

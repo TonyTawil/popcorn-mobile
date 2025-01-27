@@ -140,9 +140,18 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(SignUpActivity.this, "User registered successfully.", Toast.LENGTH_LONG).show();
-                    saveUserDetails(response.body().getId(), firstName, lastName, email);
-                    navigateToMainActivity();
+                    UserResponse userResponse = response.body();
+                    
+                    // Store the userId in SharedPreferences
+                    SharedPreferences prefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("userId", userResponse.getUser().getId());
+                    editor.apply();
+
+                    // Navigate to verification activity
+                    Intent intent = new Intent(SignUpActivity.this, VerificationActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
                     try {
                         Toast.makeText(SignUpActivity.this, "Registration failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
@@ -159,21 +168,6 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void saveUserDetails(String userId, String firstName, String lastName, String email) {
-        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("userId", userId);
-        editor.putString("firstName", firstName);
-        editor.putString("lastName", lastName);
-        editor.putString("email", email);
-        editor.apply();
-    }
-
-    private void navigateToMainActivity() {
-        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
     private void attemptSignUp() {
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
@@ -195,12 +189,18 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(SignUpActivity.this, "User registered successfully. Please verify your email.", Toast.LENGTH_LONG).show();
+                    UserResponse userResponse = response.body();
+                    
+                    // Store the userId in SharedPreferences
                     SharedPreferences prefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("userId", response.body().getId());
+                    editor.putString("userId", userResponse.getUser().getId());
                     editor.apply();
-                    navigateToVerification();
+
+                    // Navigate to verification activity
+                    Intent intent = new Intent(SignUpActivity.this, VerificationActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
                     try {
                         Toast.makeText(SignUpActivity.this, "Registration failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
@@ -220,12 +220,6 @@ public class SignUpActivity extends AppCompatActivity {
     private void navigateToSignIn() {
         Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
         startActivity(intent);
-    }
-
-    private void navigateToVerification() {
-        Intent intent = new Intent(SignUpActivity.this, VerificationActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     private boolean onNavigationItemSelected(MenuItem item) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -22,6 +23,8 @@ import com.google.android.material.navigation.NavigationView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.io.IOException;
 
 public class VerificationActivity extends AppCompatActivity {
 
@@ -80,29 +83,69 @@ public class VerificationActivity extends AppCompatActivity {
     }
 
     private void checkVerificationStatus() {
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        userId = prefs.getString("userId", null);
+
         if (userId == null) {
-            Toast.makeText(this, "User ID not provided.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please sign up or sign in first", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, SignUpActivity.class);
+            startActivity(intent);
+            finish();
             return;
         }
 
         ApiService apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService.class);
         Call<VerificationResponse> call = apiService.checkEmailVerified(userId);
+        
+        // Add log to see what userId we're checking
+        Log.d("VerificationActivity", "Checking verification status for userId: " + userId);
+
         call.enqueue(new Callback<VerificationResponse>() {
             @Override
             public void onResponse(Call<VerificationResponse> call, Response<VerificationResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isEmailVerified()) {
-                    Toast.makeText(VerificationActivity.this, "Email verified successfully", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(VerificationActivity.this, SignInActivity.class);
-                    startActivity(intent);
-                    finish();
+                // Add log for response
+                Log.d("VerificationActivity", "Response code: " + response.code());
+                if (response.body() != null) {
+                    Log.d("VerificationActivity", "Is verified: " + response.body().isEmailVerified());
+                }
+
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().isEmailVerified()) {
+                        Toast.makeText(VerificationActivity.this, "Email verified successfully", Toast.LENGTH_LONG).show();
+                        // Save verification status
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("isEmailVerified", true);
+                        editor.apply();
+                        
+                        Intent intent = new Intent(VerificationActivity.this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(VerificationActivity.this, 
+                            "Email not verified yet. Please check your email and click the verification link.", 
+                            Toast.LENGTH_LONG).show();
+                    }
                 } else {
-                    Toast.makeText(VerificationActivity.this, "Email not verified. Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                    String errorMsg = "Failed to check verification status.";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg += " " + response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Log.e("VerificationActivity", errorMsg);
+                    Toast.makeText(VerificationActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<VerificationResponse> call, Throwable t) {
-                Toast.makeText(VerificationActivity.this, "Unable to verify. Network error.", Toast.LENGTH_LONG).show();
+                Log.e("VerificationActivity", "Network error: " + t.getMessage());
+                Toast.makeText(VerificationActivity.this, 
+                    "Network error. Please check your connection and try again.", 
+                    Toast.LENGTH_LONG).show();
             }
         });
     }

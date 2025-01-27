@@ -1,6 +1,9 @@
 package com.example.popcorn.DTOs;
 
+import com.google.gson.annotations.SerializedName;
+
 public class VerificationResponse {
+    @SerializedName("isEmailVerified")
     private boolean isEmailVerified;
     private String message;
 
