@@ -25,6 +25,7 @@ import com.example.popcorn.Models.User;
 import com.google.gson.JsonObject;
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -101,5 +102,8 @@ public interface ApiService {
 
     @GET("api/auth/user/email/{email}")
     Call<UserResponse> getUserByEmail(@Path("email") String email);
+
+    @POST("api/mobile/movies/credits/batch")
+    Call<Map<String, CreditsResponse>> fetchMovieCreditsInBatch(@Body List<Integer> movieIds);
 
 }
