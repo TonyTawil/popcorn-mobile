@@ -17,7 +17,7 @@ public class RetrofitClient {
     private static final String LOCAL_URL = "http://10.0.2.2:3000/";
 
     // Change this flag to switch between production and local development
-    private static final boolean USE_PRODUCTION = false;
+    private static final boolean USE_PRODUCTION = true;
 
     public static Retrofit getRetrofitInstance(Context context) {
         if (retrofit == null) {

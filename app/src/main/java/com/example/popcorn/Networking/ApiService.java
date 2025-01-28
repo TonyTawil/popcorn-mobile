@@ -57,25 +57,25 @@ public interface ApiService {
     @POST("api/mobile/watchlist/remove")
     Call<ResponseBody> removeFromWatchlist(@Body WatchlistRemoveRequest request);
 
-    @POST("api/movies/get-watched")
+    @POST("api/mobile/watched/get")
     Call<WatchedResponse> fetchWatched(@Body WatchedRequest request);
 
-    @POST("api/movies/add-to-watched")
+    @POST("api/mobile/watched/add")
     Call<WatchedAddResponse> addToWatched(@Body WatchedAddRequest request);
 
-    @POST("api/movies/remove-from-watched")
+    @POST("api/mobile/watched/remove")
     Call<ResponseBody> removeFromWatched(@Body WatchedRemoveRequest request);
 
-    @POST("api/reviews/add-review")
+    @POST("api/mobile/reviews/add")
     Call<ReviewResponse> addReview(@Body ReviewRequest reviewRequest);
 
-    @GET("api/reviews/{movieId}")
+    @GET("api/mobile/reviews/{movieId}")
     Call<List<Review>> getReviewsByMovieId(@Path("movieId") int movieId);
 
-    @HTTP(method = "DELETE", path = "api/reviews/{reviewId}", hasBody = true)
+    @HTTP(method = "DELETE", path = "api/mobile/reviews/delete/{reviewId}", hasBody = true)
     Call<ResponseBody> deleteReview(@Path("reviewId") String reviewId, @Body JsonObject userId);
 
-    @PUT("api/reviews/{reviewId}")
+    @PUT("api/mobile/reviews/update/{reviewId}")
     Call<ReviewResponse> updateReview(@Path("reviewId") String reviewId, @Body ReviewRequest reviewRequest);
 
     @GET("api/mobile/movies/{movieId}/details")
