@@ -19,6 +19,7 @@ import com.example.popcorn.DTOs.WatchedAddResponse;
 import com.example.popcorn.DTOs.WatchedRemoveRequest;
 import com.example.popcorn.DTOs.WatchedRequest;
 import com.example.popcorn.DTOs.WatchedResponse;
+import com.example.popcorn.DTOs.MovieDetailsResponse;
 import com.example.popcorn.Models.Movie;
 import com.example.popcorn.Models.Review;
 import com.example.popcorn.Models.User;
@@ -105,5 +106,8 @@ public interface ApiService {
 
     @POST("api/mobile/movies/credits/batch")
     Call<Map<String, CreditsResponse>> fetchMovieCreditsInBatch(@Body List<Integer> movieIds);
+
+    @GET("api/mobile/movies/details")
+    Call<List<MovieDetailsResponse>> fetchMoviesDetails(@Query("ids") String movieIds);
 
 }

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.popcorn.DTOs.CreditsResponse;
 import com.example.popcorn.DTOs.MoviesResponse;
+import com.example.popcorn.DTOs.MovieDetailsResponse;
 import com.example.popcorn.Models.CastMember;
 import com.example.popcorn.Models.CrewMember;
 import com.example.popcorn.Models.Movie;
@@ -61,51 +62,64 @@ public class FetchMoviesTask extends AsyncTask<Void, Void, List<Movie>> {
 
     private List<Movie> parseMoviesFromJson(MoviesResponse moviesResponse) {
         List<Movie> results = new ArrayList<>();
-        for (Movie movieResponse : moviesResponse.getResults().subList(0, Math.min(itemsPerPage, moviesResponse.getResults().size()))) {
-            int movieId = movieResponse.getMovieId();
-            String title = movieResponse.getTitle();
-            String posterPath = movieResponse.getPosterPath();
-            String plot = movieResponse.getPlot();
-
-            List<Person> cast = fetchCredits(movieId, "cast");
-            List<Person> crew = fetchCredits(movieId, "crew");
-
-            results.add(new Movie(movieId, title, posterPath, plot, cast, crew));
+        List<Movie> movieResponses = moviesResponse.getResults()
+                .subList(0, Math.min(itemsPerPage, moviesResponse.getResults().size()));
+        
+        // Build comma-separated list of movie IDs
+        StringBuilder movieIds = new StringBuilder();
+        for (int i = 0; i < movieResponses.size(); i++) {
+            if (i > 0) movieIds.append(",");
+            movieIds.append(movieResponses.get(i).getMovieId());
         }
-        return results;
-    }
 
-    private List<Person> fetchCredits(int movieId, String type) {
-        Call<CreditsResponse> call = apiService.fetchMovieCredits(movieId);
-
+        // Fetch details for all movies in one call
+        Call<List<MovieDetailsResponse>> call = apiService.fetchMoviesDetails(movieIds.toString());
         try {
-            Response<CreditsResponse> response = call.execute();
+            Response<List<MovieDetailsResponse>> response = call.execute();
             if (response.isSuccessful() && response.body() != null) {
-                CreditsResponse credits = response.body();
-                List<Person> people = new ArrayList<>();
-                if ("cast".equals(type)) {
-                    for (CastMember member : credits.getCast()) {
-                        String imageUrl = member.getImageUrl();
-                        if (imageUrl != null && !imageUrl.isEmpty()) {
-                            imageUrl = "https://image.tmdb.org/t/p/w500" + imageUrl;
+                List<MovieDetailsResponse> detailsResponses = response.body();
+                
+                for (int i = 0; i < movieResponses.size(); i++) {
+                    Movie movieResponse = movieResponses.get(i);
+                    MovieDetailsResponse details = detailsResponses.get(i);
+                    
+                    List<Person> cast = new ArrayList<>();
+                    List<Person> crew = new ArrayList<>();
+                    
+                    if (details.getCredits() != null) {
+                        // Parse cast
+                        for (CastMember member : details.getCredits().getCast()) {
+                            String imageUrl = member.getImageUrl();
+                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                imageUrl = "https://image.tmdb.org/t/p/w500" + imageUrl;
+                            }
+                            cast.add(new Person(member.getName(), member.getCharacter(), imageUrl));
                         }
-                        people.add(new Person(member.getName(), member.getCharacter(), imageUrl));
-                    }
-                } else if ("crew".equals(type)) {
-                    for (CrewMember member : credits.getCrew()) {
-                        String imageUrl = member.getImageUrl();
-                        if (imageUrl != null && !imageUrl.isEmpty()) {
-                            imageUrl = "https://image.tmdb.org/t/p/w500" + imageUrl;
+                        
+                        // Parse crew
+                        for (CrewMember member : details.getCredits().getCrew()) {
+                            String imageUrl = member.getImageUrl();
+                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                imageUrl = "https://image.tmdb.org/t/p/w500" + imageUrl;
+                            }
+                            crew.add(new Person(member.getName(), member.getJob(), imageUrl));
                         }
-                        people.add(new Person(member.getName(), member.getJob(), imageUrl));
                     }
+
+                    results.add(new Movie(
+                        movieResponse.getMovieId(),
+                        movieResponse.getTitle(),
+                        movieResponse.getPosterPath(),
+                        movieResponse.getPlot(),
+                        cast,
+                        crew
+                    ));
                 }
-                return people;
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error fetching credits", e);
+            Log.e(TAG, "Error fetching movie details", e);
         }
-        return new ArrayList<>();
+        return results;
     }
 
     @Override
