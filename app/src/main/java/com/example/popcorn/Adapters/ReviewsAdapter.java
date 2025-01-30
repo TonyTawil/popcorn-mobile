@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.popcorn.Activities.EditReviewActivity;
 import com.example.popcorn.Models.Review;
+import com.example.popcorn.Models.User2;
 import com.example.popcorn.Networking.ApiService;
 import com.example.popcorn.Networking.RetrofitClient;
 import com.example.popcorn.R;
@@ -53,10 +54,12 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewVi
     @Override
     public void onBindViewHolder(@NonNull ReviewViewHolder holder, int position) {
         Review review = reviewsList.get(position);
-        if (review.getUserId() != null) {
+        if (review.getUserId() != null && review.getUserId().getUsername() != null) {
             holder.tvReviewerName.setText(review.getUserId().getUsername());
         } else {
-            holder.tvReviewerName.setText("Anonymous");
+            // Try to get username from the raw userId object
+            String username = getUsernameFromUserId(review.getUserId());
+            holder.tvReviewerName.setText(username != null ? username : "Anonymous");
         }
 
         holder.ratingBarSmall.setRating((float)review.getRating());
@@ -82,6 +85,12 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewVi
             holder.ivEdit.setVisibility(View.GONE);
             holder.ivDelete.setVisibility(View.GONE);
         }
+    }
+
+    private String getUsernameFromUserId(User2 userId) {
+        if (userId == null) return null;
+        if (userId.getUsername() != null) return userId.getUsername();
+        return null;
     }
 
     private void deleteReview(int position) {

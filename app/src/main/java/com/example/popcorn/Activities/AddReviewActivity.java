@@ -38,7 +38,7 @@ public class AddReviewActivity extends AppCompatActivity {
     private NavigationManager navigationManager;
 
     private RatingBar ratingBar;
-
+    private int movieId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +78,19 @@ public class AddReviewActivity extends AppCompatActivity {
 
         navigationManager.updateDrawerContents();
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
+
+        // Get movieId from intent or SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        movieId = prefs.getInt("movieId", -1);
+        
+        if (movieId == -1) {
+            // If not in SharedPreferences, try to get from intent
+            movieId = getIntent().getIntExtra("movieId", -1);
+            if (movieId != -1) {
+                // Save to SharedPreferences for later use
+                prefs.edit().putInt("movieId", movieId).apply();
+            }
+        }
     }
 
     private boolean onNavigationItemSelected(MenuItem item) {
@@ -97,24 +110,21 @@ public class AddReviewActivity extends AppCompatActivity {
         return true;
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         navigationManager.updateDrawerContents();
     }
 
-
-
     private void submitReview() {
         String reviewText = reviewEditText.getText().toString();
         float rating = ratingBar.getRating();
         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String userId = prefs.getString("userId", "");
-        int movieId = prefs.getInt("movieId", 0);
 
-        if (reviewText.isEmpty()) {
-            Toast.makeText(this, "Please enter a review", Toast.LENGTH_SHORT).show();
+        // Use the class field movieId instead of getting from SharedPreferences
+        if (movieId == -1) {
+            Toast.makeText(this, "Error: Movie ID not found", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -127,12 +137,12 @@ public class AddReviewActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(AddReviewActivity.this, "Review submitted!", Toast.LENGTH_SHORT).show();
 
-
+                    // Pass movieId explicitly in the intent
                     Intent intent = new Intent(AddReviewActivity.this, ReviewsActivity.class);
                     intent.putExtra("movieId", movieId);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the back stack
                     startActivity(intent);
                     finish();
-
                 } else {
                     String errorMessage = "You've already reviewed this movie";
                     Toast.makeText(AddReviewActivity.this, errorMessage, Toast.LENGTH_LONG).show();
@@ -146,7 +156,6 @@ public class AddReviewActivity extends AppCompatActivity {
             }
         });
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

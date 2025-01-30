@@ -1,9 +1,11 @@
 package com.example.popcorn.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -21,6 +23,7 @@ import com.example.popcorn.R;
 import com.example.popcorn.Utils.LogoutManager;
 import com.example.popcorn.Utils.NavigationManager;
 import com.google.android.material.navigation.NavigationView;
+import java.io.IOException;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -59,10 +62,22 @@ public class ReviewsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         movieId = intent.getIntExtra("movieId", -1);
+        
+        // If not in intent, try to get from SharedPreferences
         if (movieId == -1) {
+            SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            movieId = prefs.getInt("movieId", -1);
+        }
+
+        if (movieId == -1) {
+            Toast.makeText(this, "Error: Movie ID not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+
+        // Save movieId to SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        prefs.edit().putInt("movieId", movieId).apply();
 
         reviewsRecyclerView = findViewById(R.id.reviewsRecyclerView);
         reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -78,34 +93,79 @@ public class ReviewsActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload reviews when returning to this activity
+        if (movieId != -1) {
+            loadReviews();
+        }
+    }
+
     private void loadReviews() {
+        if (movieId == -1) {
+            Toast.makeText(this, "Error: Movie ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ApiService apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService.class);
         Call<List<Review>> call = apiService.getReviewsByMovieId(movieId);
+        
+        // Show loading indicator
+        if (reviewsRecyclerView != null) {
+            reviewsRecyclerView.setVisibility(View.GONE);
+        }
+
         call.enqueue(new Callback<List<Review>>() {
             @Override
             public void onResponse(Call<List<Review>> call, Response<List<Review>> response) {
+                if (isFinishing()) return; // Don't process if activity is finishing
+                
+                if (reviewsRecyclerView != null) {
+                    reviewsRecyclerView.setVisibility(View.VISIBLE);
+                }
+                
                 if (response.isSuccessful() && response.body() != null) {
                     List<Review> reviews = response.body();
-                    if (reviews.isEmpty()) {
-                        Toast.makeText(ReviewsActivity.this, "No reviews available.", Toast.LENGTH_SHORT).show();
-                    } else {
+                    if (!isFinishing()) {
                         reviewsAdapter = new ReviewsAdapter(reviews, ReviewsActivity.this);
                         reviewsRecyclerView.setAdapter(reviewsAdapter);
+                        
+                        if (reviews.isEmpty()) {
+                            Toast.makeText(ReviewsActivity.this, "No reviews available.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 } else {
-                    Toast.makeText(ReviewsActivity.this, "Failed to fetch reviews.", Toast.LENGTH_SHORT).show();
-                    Log.e("ReviewsActivity", "Failed to fetch reviews: " + response.code() + " " + response.message());
+                    if (!isFinishing()) {
+                        Log.e("ReviewsActivity", "Error code: " + response.code());
+                        try {
+                            String errorBody = response.errorBody() != null ? 
+                                response.errorBody().string() : "Unknown error";
+                            Log.e("ReviewsActivity", "Error body: " + errorBody);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Toast.makeText(ReviewsActivity.this, 
+                            "Failed to fetch reviews. Please try again.", 
+                            Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<List<Review>> call, Throwable t) {
-                Toast.makeText(ReviewsActivity.this, "Error fetching reviews.", Toast.LENGTH_LONG).show();
-                Log.e("ReviewsActivity", "Error fetching reviews: " + t.getMessage());
+                if (isFinishing()) return;
+                
+                if (reviewsRecyclerView != null) {
+                    reviewsRecyclerView.setVisibility(View.VISIBLE);
+                }
+                Log.e("ReviewsActivity", "Network error", t);
+                Toast.makeText(ReviewsActivity.this, 
+                    "Network error. Please check your connection.", 
+                    Toast.LENGTH_LONG).show();
             }
         });
     }
-
 
     private boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
