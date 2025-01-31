@@ -1,14 +1,24 @@
 package com.example.popcorn.DTOs;
 
+import com.example.popcorn.Models.User2;
 import java.util.Date;
 
 public class ReviewResponse {
-    private int movieId;
-    private String userId;
-    private float rating;
     private String _id;
+    private int movieId;
+    private User2 userId;
+    private float rating;
+    private String reviewText;
     private Date createdAt;
     private int __v;
+
+    public String getId() {
+        return _id;
+    }
+
+    public void setId(String _id) {
+        this._id = _id;
+    }
 
     public int getMovieId() {
         return movieId;
@@ -18,11 +28,11 @@ public class ReviewResponse {
         this.movieId = movieId;
     }
 
-    public String getUserId() {
+    public User2 getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(User2 userId) {
         this.userId = userId;
     }
 
@@ -34,12 +44,12 @@ public class ReviewResponse {
         this.rating = rating;
     }
 
-    public String getId() {
-        return _id;
+    public String getReviewText() {
+        return reviewText;
     }
 
-    public void setId(String _id) {
-        this._id = _id;
+    public void setReviewText(String reviewText) {
+        this.reviewText = reviewText;
     }
 
     public Date getCreatedAt() {

@@ -54,15 +54,21 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewVi
     @Override
     public void onBindViewHolder(@NonNull ReviewViewHolder holder, int position) {
         Review review = reviewsList.get(position);
-        if (review.getUserId() != null && review.getUserId().getUsername() != null) {
-            holder.tvReviewerName.setText(review.getUserId().getUsername());
+        
+        // Handle username display
+        if (review.getUserId() != null) {
+            User2 user = review.getUserId();
+            String username = user.getUsername();
+            if (username != null && !username.isEmpty()) {
+                holder.tvReviewerName.setText(username);
+            } else {
+                holder.tvReviewerName.setText("Anonymous");
+            }
         } else {
-            // Try to get username from the raw userId object
-            String username = getUsernameFromUserId(review.getUserId());
-            holder.tvReviewerName.setText(username != null ? username : "Anonymous");
+            holder.tvReviewerName.setText("Anonymous");
         }
 
-        holder.ratingBarSmall.setRating((float)review.getRating());
+        holder.ratingBarSmall.setRating(review.getRating());
         holder.tvReviewText.setText(review.getReviewText());
         holder.tvReviewDate.setText(review.getCreatedAt() != null ? dateFormat.format(review.getCreatedAt()) : "No date");
 

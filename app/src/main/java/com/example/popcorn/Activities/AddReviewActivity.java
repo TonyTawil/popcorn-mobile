@@ -121,8 +121,10 @@ public class AddReviewActivity extends AppCompatActivity {
         float rating = ratingBar.getRating();
         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String userId = prefs.getString("userId", "");
+        
+        // Add this log
+        Log.d("AddReviewActivity", "Submitting review with userId: " + userId);
 
-        // Use the class field movieId instead of getting from SharedPreferences
         if (movieId == -1) {
             Toast.makeText(this, "Error: Movie ID not found", Toast.LENGTH_SHORT).show();
             return;
@@ -134,25 +136,49 @@ public class AddReviewActivity extends AppCompatActivity {
         call.enqueue(new Callback<ReviewResponse>() {
             @Override
             public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(AddReviewActivity.this, "Review submitted!", Toast.LENGTH_SHORT).show();
-
-                    // Pass movieId explicitly in the intent
+                if (response.isSuccessful() && response.body() != null) {
+                    ReviewResponse reviewResponse = response.body();
+                    Toast.makeText(AddReviewActivity.this, "Review submitted successfully!", Toast.LENGTH_SHORT).show();
+                    
+                    // Create intent with explicit movieId
                     Intent intent = new Intent(AddReviewActivity.this, ReviewsActivity.class);
                     intent.putExtra("movieId", movieId);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the back stack
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
                 } else {
-                    String errorMessage = "You've already reviewed this movie";
-                    Toast.makeText(AddReviewActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    try {
+                        // Parse error message from response
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            Log.e("AddReviewActivity", "Error response: " + errorBody);
+                            // Try to extract just the error message
+                            if (errorBody.contains("error")) {
+                                errorBody = errorBody.substring(errorBody.indexOf("error") + 8, errorBody.length() - 2);
+                            }
+                            Toast.makeText(AddReviewActivity.this, 
+                                "Error: " + errorBody, 
+                                Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(AddReviewActivity.this, 
+                                "Failed to submit review. Please try again.", 
+                                Toast.LENGTH_LONG).show();
+                        }
+                    } catch (IOException e) {
+                        Log.e("AddReviewActivity", "Error reading error response", e);
+                        Toast.makeText(AddReviewActivity.this, 
+                            "An error occurred. Please try again.", 
+                            Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<ReviewResponse> call, Throwable t) {
-                Log.e("AddReviewActivity", "Network error while adding review for user " + userId + " and movie " + movieId, t);
-                Toast.makeText(AddReviewActivity.this, "Error connecting to the server: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("AddReviewActivity", "Network error while adding review", t);
+                Toast.makeText(AddReviewActivity.this, 
+                    "Network error: " + t.getMessage(), 
+                    Toast.LENGTH_LONG).show();
             }
         });
     }
